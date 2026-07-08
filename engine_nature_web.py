@@ -168,4 +168,4 @@ def build_html_dashboard(input_csv="bikes_analyzed.csv", output_html="index.html
     print(f"Success! Dashboard pipeline rendered fully into '{output_html}'.")
 
 if __name__ == "__main__":
-    build_html_dashboard(r'Engine\bikes_analyzed.csv',r'Engine\engine_nature.html')
+    build_html_dashboard(r'bikes_analyzed.csv',r'index.html')
