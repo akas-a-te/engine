@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Telemetry Matrix</title>
+    <style>
+        :root {
+            --bg-main: #0f172a; --bg-card: #1e293b; --border: #334155;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --accent-wild: #ec4899;
+            --accent-unapologetic: #f59e0b; --accent-alive: #10b981;
+            --accent-calm: #3b82f6; --accent-dead: #ef4444;
+        }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-main); color: var(--text-main); padding: 2rem; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        h1 { margin: 0 0 0.5rem 0; font-size: 2rem; letter-spacing: -0.05em; }
+        p.subtitle { color: var(--text-muted); margin: 0; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background-color: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 2rem; }
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
+        select, input { background-color: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 0.6rem; border-radius: 6px; outline: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .bike-name { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .badge { font-size: 0.75rem; font-weight: bold; padding: 0.25rem 0.6rem; border-radius: 4px; text-transform: uppercase; }
+        .badge-dead { background-color: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-calm { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-alive { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-unapologetic { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-wild { background-color: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.9rem; margin-bottom: 1rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.75rem 0; }
+        .spec-item { display: flex; flex-direction: column; }
+        .spec-label { color: var(--text-muted); font-size: 0.75rem; }
+        .spec-val { font-weight: 600; }
+        .profile-footer { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Vehicle Telemetry Matrix</h1>
+        <p class="subtitle">System compiled UI displaying processed machine characteristics.</p>
+    </header>
+    <div class="controls">
+        <div class="control-group">
+            <label for="search">Search Vehicle</label>
+            <input type="text" id="search" placeholder="Type vehicle name...">
+        </div>
+        <div class="control-group">
+            <label for="feelFilter">Energy Feel</label>
+            <select id="feelFilter">
+                <option value="ALL">All Energy Levels</option>
+                <option value="Dead">Dead</option>
+                <option value="Calm">Calm</option>
+                <option value="Alive">Alive</option>
+                <option value="Unapologetic">Unapologetic</option>
+                <option value="Wild">Wild</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="motionFilter">Movement Motion</label>
+            <select id="motionFilter">
+                <option value="ALL">All Motions</option>
+                <option value="Shrinked">Shrinked</option>
+                <option value="Open-Hearted">Open-Hearted</option>
+                <option value="Steady">Steady</option>
+                <option value="Electric">Electric</option>
+                <option value="Chaotic">Chaotic</option>
+            </select>
+        </div>
+    </div>
+    <div class="grid" id="matrixGrid"></div>
+</div>
+<script>
+    const dataset = [
+    {
+        "name": "Hero Splendor Plus",
+        "hp": 7.9,
+        "torque": 8.05,
+        "weight": 112.0,
+        "norm_torque": 71.88,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 71.88 )   |   MOVEMENT - Steady ( 0.981 )"
+    },
+    {
+        "name": "Hero Splendor Plus Xtec",
+        "hp": 7.9,
+        "torque": 8.05,
+        "weight": 112.0,
+        "norm_torque": 71.88,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 71.88 )   |   MOVEMENT - Steady ( 0.981 )"
+    },
+    {
+        "name": "Hero HF Deluxe",
+        "hp": 7.9,
+        "torque": 8.05,
+        "weight": 110.0,
+        "norm_torque": 73.18,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 73.18 )   |   MOVEMENT - Steady ( 0.981 )"
+    },
+    {
+        "name": "Hero HF 100",
+        "hp": 7.9,
+        "torque": 8.05,
+        "weight": 110.0,
+        "norm_torque": 73.18,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 73.18 )   |   MOVEMENT - Steady ( 0.981 )"
+    },
+    {
+        "name": "Hero Passion Plus",
+        "hp": 7.9,
+        "torque": 8.05,
+        "weight": 115.0,
+        "norm_torque": 70.0,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 70.00 )   |   MOVEMENT - Steady ( 0.981 )"
+    },
+    {
+        "name": "Hero Passion Xtec",
+        "hp": 9.0,
+        "torque": 9.79,
+        "weight": 117.0,
+        "norm_torque": 83.68,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 83.68 )   |   MOVEMENT - Steady ( 0.919 )"
+    },
+    {
+        "name": "Hero Glamour 125",
+        "hp": 10.7,
+        "torque": 10.6,
+        "weight": 122.0,
+        "norm_torque": 86.89,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 86.89 )   |   MOVEMENT - Steady ( 1.009 )"
+    },
+    {
+        "name": "Hero Super Splendor",
+        "hp": 10.7,
+        "torque": 10.6,
+        "weight": 122.0,
+        "norm_torque": 86.89,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 86.89 )   |   MOVEMENT - Steady ( 1.009 )"
+    },
+    {
+        "name": "Hero Xtreme 125R",
+        "hp": 11.4,
+        "torque": 10.5,
+        "weight": 136.0,
+        "norm_torque": 77.21,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 77.21 )   |   MOVEMENT - Steady ( 1.086 )"
+    },
+    {
+        "name": "Hero Xtreme 160R 4V",
+        "hp": 16.6,
+        "torque": 14.4,
+        "weight": 144.0,
+        "norm_torque": 100.0,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 100.00 )   |   MOVEMENT - Electric ( 1.153 )"
+    },
+    {
+        "name": "Hero Xpulse 200 4V",
+        "hp": 18.9,
+        "torque": 17.35,
+        "weight": 158.0,
+        "norm_torque": 109.81,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 109.81 )   |   MOVEMENT - Steady ( 1.089 )"
+    },
+    {
+        "name": "Hero Karizma XMR 210",
+        "hp": 25.1,
+        "torque": 20.4,
+        "weight": 163.0,
+        "norm_torque": 125.15,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 125.15 )   |   MOVEMENT - Electric ( 1.230 )"
+    },
+    {
+        "name": "Hero Mavrick 440",
+        "hp": 27.0,
+        "torque": 36.0,
+        "weight": 187.0,
+        "norm_torque": 192.51,
+        "feel": "Alive",
+        "motion": "Open-Hearted",
+        "profile": "ENERGY - Alive ( 192.51 )   |   MOVEMENT - Open-Hearted ( 0.750 )"
+    },
+    {
+        "name": "Honda Shine 100",
+        "hp": 7.2,
+        "torque": 8.05,
+        "weight": 99.0,
+        "norm_torque": 81.31,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 81.31 )   |   MOVEMENT - Steady ( 0.894 )"
+    },
+    {
+        "name": "Honda Shine 125",
+        "hp": 10.7,
+        "torque": 11.0,
+        "weight": 113.0,
+        "norm_torque": 97.35,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 97.35 )   |   MOVEMENT - Steady ( 0.973 )"
+    },
+    {
+        "name": "Honda SP 125",
+        "hp": 10.7,
+        "torque": 10.9,
+        "weight": 116.0,
+        "norm_torque": 93.97,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 93.97 )   |   MOVEMENT - Steady ( 0.982 )"
+    },
+    {
+        "name": "Honda Unicorn 160",
+        "hp": 12.9,
+        "torque": 14.0,
+        "weight": 140.0,
+        "norm_torque": 100.0,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 100.00 )   |   MOVEMENT - Steady ( 0.921 )"
+    },
+    {
+        "name": "Honda SP 160",
+        "hp": 13.2,
+        "torque": 14.5,
+        "weight": 141.0,
+        "norm_torque": 102.84,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 102.84 )   |   MOVEMENT - Steady ( 0.910 )"
+    },
+    {
+        "name": "Honda Hornet 2.0",
+        "hp": 17.0,
+        "torque": 15.9,
+        "weight": 142.0,
+        "norm_torque": 111.97,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 111.97 )   |   MOVEMENT - Steady ( 1.069 )"
+    },
+    {
+        "name": "Honda CB200X",
+        "hp": 17.0,
+        "torque": 15.9,
+        "weight": 147.0,
+        "norm_torque": 108.16,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 108.16 )   |   MOVEMENT - Steady ( 1.069 )"
+    },
+    {
+        "name": "Honda Hness CB350",
+        "hp": 20.8,
+        "torque": 30.0,
+        "weight": 181.0,
+        "norm_torque": 165.75,
+        "feel": "Alive",
+        "motion": "Open-Hearted",
+        "profile": "ENERGY - Alive ( 165.75 )   |   MOVEMENT - Open-Hearted ( 0.693 )"
+    },
+    {
+        "name": "Honda CB350RS",
+        "hp": 20.8,
+        "torque": 30.0,
+        "weight": 179.0,
+        "norm_torque": 167.6,
+        "feel": "Alive",
+        "motion": "Open-Hearted",
+        "profile": "ENERGY - Alive ( 167.60 )   |   MOVEMENT - Open-Hearted ( 0.693 )"
+    },
+    {
+        "name": "Honda NX500",
+        "hp": 47.0,
+        "torque": 43.0,
+        "weight": 196.0,
+        "norm_torque": 219.39,
+        "feel": "Alive",
+        "motion": "Steady",
+        "profile": "ENERGY - Alive ( 219.39 )   |   MOVEMENT - Steady ( 1.093 )"
+    },
+    {
+        "name": "Bajaj Platina 100",
+        "hp": 7.8,
+        "torque": 8.3,
+        "weight": 117.0,
+        "norm_torque": 70.94,
+        "feel": "Dead",
+        "motion": "Steady",
+        "profile": "ENERGY - Dead ( 70.94 )   |   MOVEMENT - Steady ( 0.940 )"
+    },
+    {
+        "name": "Bajaj Platina 110",
+        "hp": 8.4,
+        "torque": 9.81,
+        "weight": 119.0,
+        "norm_torque": 82.44,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 82.44 )   |   MOVEMENT - Steady ( 0.856 )"
+    },
+    {
+        "name": "Bajaj Pulsar 125",
+        "hp": 11.6,
+        "torque": 10.8,
+        "weight": 140.0,
+        "norm_torque": 77.14,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 77.14 )   |   MOVEMENT - Steady ( 1.074 )"
+    },
+    {
+        "name": "Bajaj Pulsar NS125",
+        "hp": 11.8,
+        "torque": 11.0,
+        "weight": 144.0,
+        "norm_torque": 76.39,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 76.39 )   |   MOVEMENT - Steady ( 1.073 )"
+    },
+    {
+        "name": "Bajaj Pulsar 150",
+        "hp": 13.8,
+        "torque": 13.25,
+        "weight": 148.0,
+        "norm_torque": 89.53,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 89.53 )   |   MOVEMENT - Steady ( 1.042 )"
+    },
+    {
+        "name": "Bajaj Pulsar N150",
+        "hp": 14.3,
+        "torque": 13.5,
+        "weight": 145.0,
+        "norm_torque": 93.1,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 93.10 )   |   MOVEMENT - Steady ( 1.059 )"
+    },
+    {
+        "name": "Bajaj Pulsar N160",
+        "hp": 15.7,
+        "torque": 14.6,
+        "weight": 152.0,
+        "norm_torque": 96.05,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 96.05 )   |   MOVEMENT - Steady ( 1.075 )"
+    },
+    {
+        "name": "Bajaj Pulsar NS160",
+        "hp": 17.0,
+        "torque": 14.6,
+        "weight": 152.0,
+        "norm_torque": 96.05,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 96.05 )   |   MOVEMENT - Electric ( 1.164 )"
+    },
+    {
+        "name": "Bajaj Pulsar NS200",
+        "hp": 24.1,
+        "torque": 18.7,
+        "weight": 158.0,
+        "norm_torque": 118.35,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 118.35 )   |   MOVEMENT - Electric ( 1.289 )"
+    },
+    {
+        "name": "Bajaj Pulsar RS200",
+        "hp": 24.2,
+        "torque": 18.7,
+        "weight": 166.0,
+        "norm_torque": 112.65,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 112.65 )   |   MOVEMENT - Electric ( 1.294 )"
+    },
+    {
+        "name": "Bajaj Pulsar N250",
+        "hp": 24.1,
+        "torque": 21.5,
+        "weight": 162.0,
+        "norm_torque": 132.72,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 132.72 )   |   MOVEMENT - Electric ( 1.121 )"
+    },
+    {
+        "name": "Bajaj Pulsar NS250",
+        "hp": 24.1,
+        "torque": 21.5,
+        "weight": 163.0,
+        "norm_torque": 131.9,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 131.90 )   |   MOVEMENT - Electric ( 1.121 )"
+    },
+    {
+        "name": "Bajaj Pulsar 220F",
+        "hp": 20.1,
+        "torque": 18.5,
+        "weight": 160.0,
+        "norm_torque": 115.62,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 115.62 )   |   MOVEMENT - Steady ( 1.086 )"
+    },
+    {
+        "name": "Bajaj Avenger Cruise 220",
+        "hp": 18.7,
+        "torque": 17.5,
+        "weight": 163.0,
+        "norm_torque": 107.36,
+        "feel": "Calm",
+        "motion": "Steady",
+        "profile": "ENERGY - Calm ( 107.36 )   |   MOVEMENT - Steady ( 1.069 )"
+    },
+    {
+        "name": "Bajaj Dominar 250",
+        "hp": 26.6,
+        "torque": 23.5,
+        "weight": 180.0,
+        "norm_torque": 130.56,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 130.56 )   |   MOVEMENT - Electric ( 1.132 )"
+    },
+    {
+        "name": "Bajaj Dominar 400",
+        "hp": 39.4,
+        "torque": 35.0,
+        "weight": 193.0,
+        "norm_torque": 181.35,
+        "feel": "Alive",
+        "motion": "Electric",
+        "profile": "ENERGY - Alive ( 181.35 )   |   MOVEMENT - Electric ( 1.126 )"
+    },
+    {
+        "name": "KTM 125 Duke",
+        "hp": 14.3,
+        "torque": 12.0,
+        "weight": 159.0,
+        "norm_torque": 75.47,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 75.47 )   |   MOVEMENT - Electric ( 1.192 )"
+    },
+    {
+        "name": "KTM RC 125",
+        "hp": 14.3,
+        "torque": 12.0,
+        "weight": 160.0,
+        "norm_torque": 75.0,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 75.00 )   |   MOVEMENT - Electric ( 1.192 )"
+    },
+    {
+        "name": "KTM 200 Duke",
+        "hp": 24.6,
+        "torque": 19.2,
+        "weight": 159.0,
+        "norm_torque": 120.75,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 120.75 )   |   MOVEMENT - Electric ( 1.281 )"
+    },
+    {
+        "name": "KTM RC 200",
+        "hp": 24.6,
+        "torque": 19.2,
+        "weight": 160.0,
+        "norm_torque": 120.0,
+        "feel": "Calm",
+        "motion": "Electric",
+        "profile": "ENERGY - Calm ( 120.00 )   |   MOVEMENT - Electric ( 1.281 )"
+    },
+    {
+        "name": "KTM 250 Duke",
+        "hp": 30.0,
+        "torque": 25.0,
+        "weight": 163.0,
+        "norm_torque": 153.37,
+        "feel": "Alive",
+        "motion": "Electric",
+        "profile": "ENERGY - Alive ( 153.37 )   |   MOVEMENT - Electric ( 1.200 )"
+    },
+    {
+        "name": "KTM 390 Duke",
+        "hp": 45.3,
+        "torque": 39.0,
+        "weight": 168.0,
+        "norm_torque": 232.14,
+        "feel": "Unapologetic",
+        "motion": "Electric",
+        "profile": "ENERGY - Unapologetic ( 232.14 )   |   MOVEMENT - Electric ( 1.162 )"
+    },
+    {
+        "name": "KTM RC 390",
+        "hp": 42.9,
+        "torque": 37.0,
+        "weight": 172.0,
+        "norm_torque": 215.12,
+        "feel": "Alive",
+        "motion": "Electric",
+        "profile": "ENERGY - Alive ( 215.12 )   |   MOVEMENT - Electric ( 1.159 )"
+    },
+    {
+        "name": "KTM 390 Adventure",
+        "hp": 42.9,
+        "torque": 37.0,
+        "weight": 177.0,
+        "norm_torque": 209.04,
+        "feel": "Alive",
+        "motion": "Electric",
+        "profile": "ENERGY - Alive ( 209.04 )   |   MOVEMENT - Electric ( 1.159 )"
+    },
+    {
+        "name": "Triumph Speed T4",
+        "hp": 30.6,
+        "torque": 36.0,
+        "weight": 170.0,
+        "norm_torque": 211.76,
+        "feel": "Alive",
+        "motion": "Steady",
+        "profile": "ENERGY - Alive ( 211.76 )   |   MOVEMENT - Steady ( 0.850 )"
+    },
+    {
+        "name": "Triumph Speed 400",
+        "hp": 39.5,
+        "torque": 37.5,
+        "weight": 176.0,
+        "norm_torque": 213.07,
+        "feel": "Alive",
+        "motion": "Steady",
+        "profile": "ENERGY - Alive ( 213.07 )   |   MOVEMENT - Steady ( 1.053 )"
+    },
+    {
+        "name": "Triumph Scrambler 400 X",
+        "hp": 39.5,
+        "torque": 37.5,
+        "weight": 185.0,
+        "norm_torque": 202.7,
+        "feel": "Alive",
+        "motion": "Steady",
+        "profile": "ENERGY - Alive ( 202.70 )   |   MOVEMENT - Steady ( 1.053 )"
+    },
+    {
+        "name": "Harley-Davidson X440",
+        "hp": 27.0,
+        "torque": 38.0,
+        "weight": 190.5,
+        "norm_torque": 199.48,
+        "feel": "Alive",
+        "motion": "Open-Hearted",
+        "profile": "ENERGY - Alive ( 199.48 )   |   MOVEMENT - Open-Hearted ( 0.711 )"
+    }
+];
+
+    const grid = document.getElementById('matrixGrid');
+    const searchInput = document.getElementById('search');
+    const feelFilter = document.getElementById('feelFilter');
+    const motionFilter = document.getElementById('motionFilter');
+
+    function displayCards(data) {
+        grid.innerHTML = '';
+        if(data.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No machines found.</p>`;
+            return;
+        }
+        data.forEach(bike => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const badgeClass = `badge badge-${bike.feel.toLowerCase()}`;
+            card.innerHTML = `
+                <div>
+                    <div class="card-header">
+                        <h3 class="bike-name">${bike.name}</h3>
+                        <span class="${badgeClass}">${bike.feel}</span>
+                    </div>
+                    <div class="specs">
+                        <div class="spec-item"><span class="spec-label">Power</span><span class="spec-val">${bike.hp} HP</span></div>
+                        <div class="spec-item"><span class="spec-label">Torque</span><span class="spec-val">${bike.torque} Nm</span></div>
+                        <div class="spec-item"><span class="spec-label">Weight</span><span class="spec-val">${bike.weight} kg</span></div>
+                        <div class="spec-item"><span class="spec-label">Norm. Torque</span><span class="spec-val">${parseFloat(bike.norm_torque).toFixed(1)} Nm/t</span></div>
+                    </div>
+                </div>
+                <div class="profile-footer">${bike.profile}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function filterData() {
+        const query = searchInput.value.toLowerCase();
+        const feel = feelFilter.value;
+        const motion = motionFilter.value;
+        const filtered = dataset.filter(bike => {
+            return bike.name.toLowerCase().includes(query) && 
+                   (feel === 'ALL' || bike.feel === feel) && 
+                   (motion === 'ALL' || bike.motion === motion);
+        });
+        displayCards(filtered);
+    }
+
+    searchInput.addEventListener('input', filterData);
+    feelFilter.addEventListener('change', filterData);
+    motionFilter.addEventListener('change', filterData);
+    displayCards(dataset);
+</script>
+</body>
+</html>

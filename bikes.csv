@@ -1,0 +1,52 @@
+bike_name,power_hp,torque_nm,weight_kg
+Hero Splendor Plus,7.9,8.05,112
+Hero Splendor Plus Xtec,7.9,8.05,112
+Hero HF Deluxe,7.9,8.05,110
+Hero HF 100,7.9,8.05,110
+Hero Passion Plus,7.9,8.05,115
+Hero Passion Xtec,9.0,9.79,117
+Hero Glamour 125,10.7,10.6,122
+Hero Super Splendor,10.7,10.6,122
+Hero Xtreme 125R,11.4,10.5,136
+Hero Xtreme 160R 4V,16.6,14.4,144
+Hero Xpulse 200 4V,18.9,17.35,158
+Hero Karizma XMR 210,25.1,20.4,163
+Hero Mavrick 440,27.0,36.0,187
+Honda Shine 100,7.2,8.05,99
+Honda Shine 125,10.7,11.0,113
+Honda SP 125,10.7,10.9,116
+Honda Unicorn 160,12.9,14.0,140
+Honda SP 160,13.2,14.5,141
+Honda Hornet 2.0,17.0,15.9,142
+Honda CB200X,17.0,15.9,147
+Honda Hness CB350,20.8,30.0,181
+Honda CB350RS,20.8,30.0,179
+Honda NX500,47.0,43.0,196
+Bajaj Platina 100,7.8,8.3,117
+Bajaj Platina 110,8.4,9.81,119
+Bajaj Pulsar 125,11.6,10.8,140
+Bajaj Pulsar NS125,11.8,11.0,144
+Bajaj Pulsar 150,13.8,13.25,148
+Bajaj Pulsar N150,14.3,13.5,145
+Bajaj Pulsar N160,15.7,14.6,152
+Bajaj Pulsar NS160,17.0,14.6,152
+Bajaj Pulsar NS200,24.1,18.7,158
+Bajaj Pulsar RS200,24.2,18.7,166
+Bajaj Pulsar N250,24.1,21.5,162
+Bajaj Pulsar NS250,24.1,21.5,163
+Bajaj Pulsar 220F,20.1,18.5,160
+Bajaj Avenger Cruise 220,18.7,17.5,163
+Bajaj Dominar 250,26.6,23.5,180
+Bajaj Dominar 400,39.4,35.0,193
+KTM 125 Duke,14.3,12.0,159
+KTM RC 125,14.3,12.0,160
+KTM 200 Duke,24.6,19.2,159
+KTM RC 200,24.6,19.2,160
+KTM 250 Duke,30.0,25.0,163
+KTM 390 Duke,45.3,39.0,168
+KTM RC 390,42.9,37.0,172
+KTM 390 Adventure,42.9,37.0,177
+Triumph Speed T4,30.6,36.0,170
+Triumph Speed 400,39.5,37.5,176
+Triumph Scrambler 400 X,39.5,37.5,185
+Harley-Davidson X440,27.0,38.0,190.5
