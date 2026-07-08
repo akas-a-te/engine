@@ -35,7 +35,7 @@ def build_html_dashboard(input_csv="bikes_analyzed.csv", output_html="index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Telemetry Matrix</title>
+    <title>Vehicle Aliveness</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -214,7 +214,7 @@ def build_html_dashboard(input_csv="bikes_analyzed.csv", output_html="index.html
 <body>
 <div class="container">
     <header>
-        <h1>Vehicle Telemetry Matrix</h1>
+        <h1>Vehicle Aliveness</h1>
         <p class="subtitle">System compiled UI displaying processed machine characteristics.</p>
     </header>
     <div class="controls">
